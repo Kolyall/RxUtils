@@ -1,0 +1,26 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+publishing {
+    publications {
+        androidLibrary(MavenPublication) {
+            groupId publishedGroupId
+            artifactId artifactLocal
+            version libraryVersion
+            artifact("$buildDir/outputs/aar/${libraryName}-release.aar")
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = "$buildDir/repository"
+            def snapshotsRepoUrl = "$buildDir/repository"
+            url = libraryVersion.endsWith('release') ? snapshotsRepoUrl : releasesRepoUrl
+            name = 'mavenBuildDir'
+        }
+    }
+
+}

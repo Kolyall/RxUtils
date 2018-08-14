@@ -15,6 +15,7 @@ ext {
 
     publishedGroupId = 'com.github.kolyall'//only this
     artifact = 'rx-android-utils'//should be the same as module name
+    artifactLocal = 'rx-android-utils'//should be the same as module name
     libraryVersion = appVersionName
 
     libraryName = 'rx-android-utils'
