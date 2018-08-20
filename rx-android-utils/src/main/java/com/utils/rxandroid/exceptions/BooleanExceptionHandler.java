@@ -4,17 +4,17 @@ import rx.functions.Action1;
 
 public class BooleanExceptionHandler implements Action1<Boolean> {
 
-    private boolean mAssert;
-    private FlowException mException;
+    private final boolean mAssert;
+    private final FlowException mException;
 
-    public BooleanExceptionHandler(boolean mAssert, FlowException exception) {
+    public BooleanExceptionHandler(final boolean mAssert, final FlowException exception) {
         this.mAssert = mAssert;
         this.mException = exception;
     }
 
     @Override
-    public void call(Boolean result) {
-        if (result != null && (result == mAssert)) {
+    public void call(final Boolean result) {
+        if (result != null && (result != mAssert)) {
             throw mException;
         }
     }
