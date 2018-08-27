@@ -5,9 +5,9 @@ import rx.functions.Action1;
 public class BooleanExceptionHandler implements Action1<Boolean> {
 
     private final boolean mAssert;
-    private final FlowException mException;
+    private final RuntimeException mException;
 
-    public BooleanExceptionHandler(final boolean mAssert, final FlowException exception) {
+    public BooleanExceptionHandler(final boolean mAssert, final RuntimeException exception) {
         this.mAssert = mAssert;
         this.mException = exception;
     }
