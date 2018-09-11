@@ -145,6 +145,20 @@ public class RxNetworkUtils {
         return this;
     }
 
+    public RxNetworkUtils disable(Disableable disableable) {
+        if (disableable != null) {
+            transformers.add(
+                    observable -> observable
+                            .doOnSubscribe(() -> disableable.setEnabled(false))
+                            .doOnError(throwable -> disableable.setEnabled(true))
+                            .doOnCompleted(() -> disableable.setEnabled(true))
+                            .doOnTerminate(() -> disableable.setEnabled(true))
+                            .doAfterTerminate(() -> disableable.setEnabled(true))
+            );
+        }
+        return this;
+    }
+
     public RxNetworkUtils progressMenuItem() {
         if (baseView != null && baseView instanceof HasProgressMenuItem) {
             transformers.add(observable -> observable
@@ -201,8 +215,8 @@ public class RxNetworkUtils {
     public RxNetworkUtils errorView() {
         if (baseView != null && baseView instanceof HasErrorView) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(() -> ((HasErrorView)baseView).hideErrorView())
-                    .doOnError(((HasErrorView)baseView)::showErrorView));
+                    .doOnSubscribe(() -> ((HasErrorView) baseView).hideErrorView())
+                    .doOnError(((HasErrorView) baseView)::showErrorView));
         }
         return this;
     }
@@ -297,7 +311,7 @@ public class RxNetworkUtils {
                 .flatMap(retryCount -> Observable.timer((long) Math.pow(delay, retryCount), unit));
     }
 
-    public interface BaseView extends HasProgressBar, HasProgressDialog, HasErrorView{
+    public interface BaseView extends HasProgressBar, HasProgressDialog, HasErrorView {
 
         void showErrorPopupDialog(Throwable throwable);
 
@@ -330,6 +344,14 @@ public class RxNetworkUtils {
         void showProgress();
 
         void hideProgress();
+
+    }
+
+    public interface Disableable {
+
+        void setEnabled(boolean enabled);
+
+        boolean isEnabled();
 
     }
 
