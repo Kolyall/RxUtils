@@ -132,6 +132,19 @@ public class RxNetworkUtils {
         return this;
     }
 
+    public RxNetworkUtils progressOn(HasProgress hasProgress) {
+        if (hasProgress != null) {
+            transformers.add(observable -> observable
+                    .doOnSubscribe(hasProgress::showProgress)
+                    .doOnError(throwable -> hasProgress.hideProgress())
+                    .doOnCompleted(hasProgress::hideProgress)
+                    .doOnTerminate(hasProgress::hideProgress)
+                    .doAfterTerminate(hasProgress::hideProgress))
+            ;
+        }
+        return this;
+    }
+
     public RxNetworkUtils progressMenuItem() {
         if (baseView != null && baseView instanceof HasProgressMenuItem) {
             transformers.add(observable -> observable
@@ -309,6 +322,14 @@ public class RxNetworkUtils {
         void showProgressBar();
 
         void hideProgressBar();
+
+    }
+
+    public interface HasProgress {
+
+        void showProgress();
+
+        void hideProgress();
 
     }
 
