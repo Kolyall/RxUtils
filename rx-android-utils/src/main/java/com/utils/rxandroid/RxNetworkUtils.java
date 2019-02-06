@@ -159,6 +159,20 @@ public class RxNetworkUtils {
         return this;
     }
 
+    public RxNetworkUtils nonClickable(NonClickable clickable) {
+        if (clickable != null) {
+            transformers.add(
+                    observable -> observable
+                            .doOnSubscribe(() -> clickable.setClickable(false))
+                            .doOnError(throwable -> clickable.setClickable(true))
+                            .doOnCompleted(() -> clickable.setClickable(true))
+                            .doOnTerminate(() -> clickable.setClickable(true))
+                            .doAfterTerminate(() -> clickable.setClickable(true))
+            );
+        }
+        return this;
+    }
+
     public RxNetworkUtils progressMenuItem() {
         if (baseView != null && baseView instanceof HasProgressMenuItem) {
             transformers.add(observable -> observable
@@ -352,6 +366,13 @@ public class RxNetworkUtils {
         void setEnabled(boolean enabled);
 
         boolean isEnabled();
+
+    }
+    public interface NonClickable {
+
+        void setClickable(boolean clickable);
+
+        boolean isClickable();
 
     }
 
