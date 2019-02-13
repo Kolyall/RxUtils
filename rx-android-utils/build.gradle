@@ -49,5 +49,7 @@ dependencies {
 apply from: 'https://raw.githubusercontent.com/Kolyall/MavenPublish/master/libraryInfo.gradle'
 apply from: 'https://raw.githubusercontent.com/Kolyall/MavenPublish/master/artifactsSetup.gradle'
 apply from: 'https://raw.githubusercontent.com/Kolyall/MavenPublish/master/installSetup.gradle'
-apply from: 'https://raw.githubusercontent.com/Kolyall/MavenPublish/master/bintraySetup.gradle'
+if (project.rootProject.file('local.properties').exists()) {
+    apply from: 'https://raw.githubusercontent.com/Kolyall/MavenPublish/master/bintraySetup.gradle'
+}
 apply from: 'mavenCustom.gradle'
