@@ -1,18 +1,17 @@
 package com.utils.rxandroid;
 
-import rx.functions.Func1;
+import io.reactivex.functions.Predicate;
 
 /**
  * Created by User on 10.04.2017.
  */
 
-public class FilterNonNull<T> implements Func1<T, Boolean> {
+public class FilterNonNull<T> implements Predicate<T> {
     public static final String TAG = FilterNonNull.class.getSimpleName();
 
     @Override
-    public Boolean call(T item) {
+    public boolean test(T item) throws Exception {
         ThreadUtils.printThread(TAG);
         return item != null;
     }
-
 }

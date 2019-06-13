@@ -8,12 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.ObservableTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
+
 
 /**
  * Created by Nick Unuchek on 29.05.2017.
@@ -22,7 +25,7 @@ import rx.schedulers.Schedulers;
 public class RxNetworkUtils {
     private static final String TAG = RxNetworkUtils.class.getSimpleName();
 
-    private List<Observable.Transformer<?, ?>> transformers;
+    private List<ObservableTransformer<?, ?>> transformers;
     @Nullable private BaseView baseView;
 
     public static RxNetworkUtils builder() {
@@ -42,12 +45,12 @@ public class RxNetworkUtils {
         this.baseView = baseView;
     }
 
-    public <T> Observable.Transformer<T, T> build() {
+    public <T> ObservableTransformer<T, T> build() {
         return tObservable -> {
             for (int i = 0; i < transformers.size(); i++) {
                 //noinspection unchecked
                 tObservable = tObservable.compose(
-                        (Observable.Transformer<T, T>) transformers.get(i)
+                        (ObservableTransformer<T, T>) transformers.get(i)
                 );
             }
             return tObservable;
@@ -113,7 +116,7 @@ public class RxNetworkUtils {
     }
 
     @NonNull
-    public RxNetworkUtils onErrorResumeNext(Func1<Throwable, Observable<?>> throwableObservableFunc1) {
+    public RxNetworkUtils onErrorResumeNext(Function<Throwable, Observable<?>> throwableObservableFunc1) {
         transformers.add(observable -> observable
                 .onErrorResumeNext(throwableObservableFunc1));
         return this;
@@ -122,9 +125,9 @@ public class RxNetworkUtils {
     public RxNetworkUtils progressBar() {
         if (baseView != null) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(baseView::showProgressBar)
+                    .doOnSubscribe(disposable -> baseView.showProgressBar())
                     .doOnError(throwable -> baseView.hideProgressBar())
-                    .doOnCompleted(baseView::hideProgressBar)
+                    .doOnComplete(baseView::hideProgressBar)
                     .doOnTerminate(baseView::hideProgressBar)
                     .doAfterTerminate(baseView::hideProgressBar))
             ;
@@ -135,9 +138,9 @@ public class RxNetworkUtils {
     public RxNetworkUtils progressOn(HasProgress hasProgress) {
         if (hasProgress != null) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(hasProgress::showProgress)
+                    .doOnSubscribe(disposable -> hasProgress.showProgress())
                     .doOnError(throwable -> hasProgress.hideProgress())
-                    .doOnCompleted(hasProgress::hideProgress)
+                    .doOnComplete(hasProgress::hideProgress)
                     .doOnTerminate(hasProgress::hideProgress)
                     .doAfterTerminate(hasProgress::hideProgress))
             ;
@@ -149,9 +152,9 @@ public class RxNetworkUtils {
         if (disableable != null) {
             transformers.add(
                     observable -> observable
-                            .doOnSubscribe(() -> disableable.setEnabled(false))
+                            .doOnSubscribe(disposable -> disableable.setEnabled(false))
                             .doOnError(throwable -> disableable.setEnabled(true))
-                            .doOnCompleted(() -> disableable.setEnabled(true))
+                            .doOnComplete(() -> disableable.setEnabled(true))
                             .doOnTerminate(() -> disableable.setEnabled(true))
                             .doAfterTerminate(() -> disableable.setEnabled(true))
             );
@@ -163,9 +166,9 @@ public class RxNetworkUtils {
         if (clickable != null) {
             transformers.add(
                     observable -> observable
-                            .doOnSubscribe(() -> clickable.setClickable(false))
+                            .doOnSubscribe(disposable -> clickable.setClickable(false))
                             .doOnError(throwable -> clickable.setClickable(true))
-                            .doOnCompleted(() -> clickable.setClickable(true))
+                            .doOnComplete(() -> clickable.setClickable(true))
                             .doOnTerminate(() -> clickable.setClickable(true))
                             .doAfterTerminate(() -> clickable.setClickable(true))
             );
@@ -176,9 +179,9 @@ public class RxNetworkUtils {
     public RxNetworkUtils progressMenuItem() {
         if (baseView != null && baseView instanceof HasProgressMenuItem) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(((HasProgressMenuItem) baseView)::showProgressMenuItem)
+                    .doOnSubscribe(disposable->((HasProgressMenuItem) baseView).showProgressMenuItem())
                     .doOnError(throwable -> ((HasProgressMenuItem) baseView).hideProgressMenuItem())
-                    .doOnCompleted(((HasProgressMenuItem) baseView)::hideProgressMenuItem)
+                    .doOnComplete(((HasProgressMenuItem) baseView)::hideProgressMenuItem)
                     .doOnTerminate(((HasProgressMenuItem) baseView)::hideProgressMenuItem)
                     .doAfterTerminate(((HasProgressMenuItem) baseView)::hideProgressMenuItem))
             ;
@@ -189,9 +192,9 @@ public class RxNetworkUtils {
     public RxNetworkUtils shimmerProgress() {
         if (baseView != null && baseView instanceof HasShimmerView) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(((HasShimmerView) baseView)::showShimmerAdapter)
+                    .doOnSubscribe(disposable->((HasShimmerView) baseView).showShimmerAdapter())
                     .doOnError(throwable -> ((HasShimmerView) baseView).hideShimmerAdapter())
-                    .doOnCompleted(((HasShimmerView) baseView)::hideShimmerAdapter)
+                    .doOnComplete(((HasShimmerView) baseView)::hideShimmerAdapter)
                     .doOnTerminate(((HasShimmerView) baseView)::hideShimmerAdapter)
                     .doAfterTerminate(((HasShimmerView) baseView)::hideShimmerAdapter))
             ;
@@ -202,9 +205,9 @@ public class RxNetworkUtils {
     public RxNetworkUtils progressDialog() {
         if (baseView != null) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(baseView::showProgressDialog)
+                    .doOnSubscribe(disposable -> baseView.showProgressDialog())
                     .doOnError(throwable -> baseView.hideProgressDialog())
-                    .doOnCompleted(baseView::hideProgressDialog));
+                    .doOnComplete(baseView::hideProgressDialog));
         }
         return this;
     }
@@ -212,7 +215,7 @@ public class RxNetworkUtils {
     public RxNetworkUtils progressDialog(@StringRes int titleResId, @StringRes int messageResId) {
         if (baseView != null) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(() -> baseView.showProgressDialog(titleResId, messageResId))
+                    .doOnSubscribe(disposable -> baseView.showProgressDialog(titleResId, messageResId))
                     .doOnTerminate(baseView::hideProgressDialog));
         }
         return this;
@@ -229,7 +232,7 @@ public class RxNetworkUtils {
     public RxNetworkUtils errorView() {
         if (baseView != null && baseView instanceof HasErrorView) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(() -> ((HasErrorView) baseView).hideErrorView())
+                    .doOnSubscribe(disposable -> ((HasErrorView) baseView).hideErrorView())
                     .doOnError(((HasErrorView) baseView)::showErrorView));
         }
         return this;
@@ -276,49 +279,39 @@ public class RxNetworkUtils {
         return this;
     }
 
-    public <T> RxNetworkUtils doOnNext(Action1<T> onNext) {
+    public <T> RxNetworkUtils doOnNext(Consumer<T> onNext) {
         if (baseView != null) {
-            transformers.add(new Observable.Transformer<T, T>() {
-                @Override
-                public Observable<T> call(Observable<T> observable) {
-                    return observable
-                            .doOnNext(onNext);
-                }
-            });
+            transformers.add((ObservableTransformer<T, T>) observable -> observable
+                    .doOnNext(onNext));
         }
         return this;
     }
 
-    public <T> RxNetworkUtils doOnError(Action1<Throwable> doOnError) {
+    public <T> RxNetworkUtils doOnError(Consumer<Throwable> doOnError) {
         if (baseView != null) {
-            transformers.add(new Observable.Transformer<T, T>() {
-                @Override
-                public Observable<T> call(Observable<T> observable) {
-                    return observable
-                            .doOnError(doOnError);
-                }
-            });
+            transformers.add((ObservableTransformer<T, T>) observable -> observable
+                    .doOnError(doOnError));
         }
         return this;
     }
 
-    public RxNetworkUtils doOnCompleted(Action0 action0) {
+    public RxNetworkUtils doOnCompleted(Action action0) {
         if (baseView != null) {
             transformers.add(observable -> observable
-                    .doOnCompleted(action0));
+                    .doOnComplete(action0));
         }
         return this;
     }
 
-    public RxNetworkUtils doOnSubscribe(Action0 action0) {
+    public RxNetworkUtils doOnSubscribe(Consumer<? super Disposable> consumer) {
         if (baseView != null) {
             transformers.add(observable -> observable
-                    .doOnSubscribe(action0));
+                    .doOnSubscribe(consumer));
         }
         return this;
     }
 
-    public static Func1<Observable<? extends Throwable>, Observable<?>> exponentialBackoff(
+    public static Function<Observable<? extends Throwable>, Observable<?>> exponentialBackoff(
             int maxRetryCount, long delay, TimeUnit unit) {
         return errors -> errors
                 .zipWith(Observable.range(1, maxRetryCount), (error, retryCount) -> retryCount)
@@ -368,6 +361,7 @@ public class RxNetworkUtils {
         boolean isEnabled();
 
     }
+
     public interface NonClickable {
 
         void setClickable(boolean clickable);
