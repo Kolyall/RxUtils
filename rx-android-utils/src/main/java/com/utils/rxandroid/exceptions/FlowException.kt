@@ -1,6 +1,6 @@
 package com.utils.rxandroid.exceptions
 
-class FlowException : RuntimeException {
+open class FlowException : RuntimeException {
     constructor()
 
     constructor(message: String) : super(message)

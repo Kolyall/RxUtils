@@ -6,7 +6,7 @@ import android.support.annotation.StringRes
  * Created by Nick Unuchek on 21.12.2017.
  */
 
-class AppException : RuntimeException {
+open class AppException : RuntimeException {
     @StringRes
     var messageResId: Int = -1
 
