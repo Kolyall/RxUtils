@@ -2,10 +2,8 @@ package com.rxutils
 
 import com.utils.rxandroid.HasError
 import com.utils.rxandroid.HasProgress
-import com.utils.rxandroid.RxFlowable
 import com.utils.rxandroid.RxObservable
 import com.utils.rxandroid.RxSingle
-import io.reactivex.Flowable
 import io.reactivex.Observable
 import io.reactivex.schedulers.TestScheduler
 import org.junit.Test
@@ -21,22 +19,11 @@ import org.mockito.junit.MockitoJUnitRunner
  * @see [Testing documentation](http://d.android.com/tools/testing)
  */
 @RunWith(MockitoJUnitRunner::class)
-class ExampleUnitTest {
+class RxObservableUnitTests {
     private val testScheduler = TestScheduler()
 
     @Test
-    fun testRxFlowable1() {
-        Flowable.range(1, 5)
-            .compose(RxFlowable.builder(testScheduler, testScheduler).async().build())
-            .test()
-            .also { testScheduler.triggerActions() }
-            .assertComplete()
-            .assertResult(1, 2, 3, 4, 5)
-            .dispose()
-    }
-
-    @Test
-    fun testRxObservable1() {
+    fun test1() {
         Observable.range(1, 5)
             .compose(RxObservable.builder(testScheduler, testScheduler).async().build())
             .test()
@@ -47,7 +34,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testRxObservable2() {
+    fun test2() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .compose(RxObservable.builder(testScheduler, testScheduler).async().build())
@@ -59,7 +46,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testRxObservable3() {
+    fun test3() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -72,7 +59,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testRxObservable4() {
+    fun test4() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -87,7 +74,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testRxObservable5() {
+    fun test5() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -103,7 +90,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testRxObservable6() {
+    fun test6() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -135,7 +122,7 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testRxObservable7() {
+    fun test7() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -153,14 +140,16 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun testRxObservable8() {
+    fun test8() {
         val runtimeException = RuntimeException()
         Observable.error<Boolean>(runtimeException)
-            .compose(RxObservable.builder(testScheduler, testScheduler).async().errorOn(errorView).build())
+            .compose(RxObservable.builder(testScheduler, testScheduler).async().progressOn(view).errorOn(errorView).build())
             .test()
             .also { testScheduler.triggerActions() }
             .assertError(runtimeException)
             .dispose()
+        verify(view, times(1)).showProgress()
+        verify(view, times(1)).hideProgress()
         verify(errorView, times(1)).hideError()
         verify(errorView, times(1)).showError(runtimeException)
     }
