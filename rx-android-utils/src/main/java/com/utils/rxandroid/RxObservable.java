@@ -122,9 +122,7 @@ public class RxObservable {
                     .doOnSubscribe(disposable -> hasProgress.showProgress())
                     .doOnError(throwable -> hasProgress.hideProgress())
                     .doOnComplete(hasProgress::hideProgress)
-                    .doOnDispose(hasProgress::hideProgress)
-                    .doOnTerminate(hasProgress::hideProgress)
-                    .doAfterTerminate(hasProgress::hideProgress))
+            )
             ;
         }
         return this;

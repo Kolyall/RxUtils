@@ -33,6 +33,8 @@ dependencies {
     implementation project(':rx-android-utils')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
+    testImplementation "org.mockito:mockito-core:+"
+    androidTestImplementation "org.mockito:mockito-android:+"
 
 }
 repositories {
