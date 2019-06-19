@@ -23,7 +23,7 @@ class RxObservableUnitTests {
     private val testScheduler = TestScheduler()
 
     @Test
-    fun test1() {
+    fun test01() {
         Observable.range(1, 5)
             .compose(RxObservable.builder(testScheduler, testScheduler).async().build())
             .test()
@@ -34,7 +34,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test2() {
+    fun test02() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .compose(RxObservable.builder(testScheduler, testScheduler).async().build())
@@ -46,7 +46,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test3() {
+    fun test03() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -59,7 +59,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test4() {
+    fun test04() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -74,7 +74,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test5() {
+    fun test05() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -90,7 +90,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test6() {
+    fun test06() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -124,7 +124,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test7() {
+    fun test07() {
         val items = arrayListOf(true, false, true, false)
         Observable.fromIterable(items)
             .filter { t -> t }
@@ -142,7 +142,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test8() {
+    fun test08() {
         val runtimeException = RuntimeException()
         Observable.error<Boolean>(runtimeException)
             .compose(RxObservable.builder(testScheduler, testScheduler).async().progressOn(view).errorOn(errorView).build())
@@ -157,7 +157,7 @@ class RxObservableUnitTests {
     }
 
     @Test
-    fun test9() {
+    fun test09() {
         val array = arrayOf(1, 2, 3)
         Observable.just(array)
             .filter(Array<Int>::isNotEmpty)
@@ -165,6 +165,21 @@ class RxObservableUnitTests {
             .test()
             .also { testScheduler.triggerActions() }
             .assertResult(array)
+            .dispose()
+    }
+    @Test
+    fun test10() {
+        val array = listOf("", "2", "3")
+        Observable.just(array)
+            .filter(List<String>::isNotEmpty)
+            .flatMap { Observable.fromIterable(it) }
+            .filter(CharSequence::isNotEmpty)
+            .toList()
+            .toObservable()
+            .compose(RxObservable.builder(testScheduler, testScheduler).async().progressOn(view).errorOn(errorView).build())
+            .test()
+            .also { testScheduler.triggerActions() }
+            .assertResult(listOf("2", "3"))
             .dispose()
     }
 }

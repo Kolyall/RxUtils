@@ -17,7 +17,7 @@ class RxFlowableUnitTests {
     private val testScheduler = TestScheduler()
 
     @Test
-    fun test1() {
+    fun test01() {
         Flowable.range(1, 5)
             .compose(RxFlowable.builder(testScheduler, testScheduler).async().build())
             .test()
