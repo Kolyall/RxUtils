@@ -105,7 +105,8 @@ class RxObservableUnitTests {
             .dispose()
     }
 
-    @Mock val view : HasProgress= object : HasProgress{
+    @Mock
+    val view: HasProgress = object : HasProgress {
         override fun showProgress() {
         }
 
@@ -113,7 +114,8 @@ class RxObservableUnitTests {
         }
     }
 
-    @Mock val errorView : HasError= object : HasError {
+    @Mock
+    val errorView: HasError = object : HasError {
         override fun hideError() {
         }
 
@@ -152,5 +154,17 @@ class RxObservableUnitTests {
         verify(view, times(1)).hideProgress()
         verify(errorView, times(1)).hideError()
         verify(errorView, times(1)).showError(runtimeException)
+    }
+
+    @Test
+    fun test9() {
+        val array = arrayOf(1, 2, 3)
+        Observable.just(array)
+            .filter(Array<Int>::isNotEmpty)
+            .compose(RxObservable.builder(testScheduler, testScheduler).async().progressOn(view).errorOn(errorView).build())
+            .test()
+            .also { testScheduler.triggerActions() }
+            .assertResult(array)
+            .dispose()
     }
 }
